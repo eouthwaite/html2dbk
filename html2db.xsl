@@ -10,11 +10,13 @@
   -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:exslt="http://exslt.org/common"
-                xmlns:java="http://xml.apache.org/xalan/java"
-                xmlns:math="http://exslt.org/math"
-                xmlns:db="urn:docbook"
+                xmlns:temp="http://this.is.temp/html2db"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                xmlns:db="http://docbook.org/ns/docbook"
                 xmlns:h="http://www.w3.org/1999/xhtml"
-                exclude-result-prefixes="exslt java math db h"
+                xmlns="http://docbook.org/ns/docbook"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                exclude-result-prefixes="exslt db h"
                 version="1.0">
   
   <!-- Prefixed to every id generated from <a name=> and <a href="#"> -->
@@ -234,6 +236,13 @@
     </para>
   </xsl:template>
   
+  <!--xsl:template match="h:p[@class='section']">
+    <para>
+      <xsl:apply-templates select="@id"/>
+      <xsl:apply-templates mode="inline"/>
+    </para>
+  </xsl:template-->
+  
   <!-- Wrap naked text nodes in a <para> so that they'll process more
        correctly.  The h:body also warns about these, because even
        this preprocessing step isn't guaranteed to fix them.  This is
@@ -428,7 +437,7 @@
     
     <xsl:param name="n">
       <xsl:if test="$tested">
-        <xsl:value-of select="java:java.lang.Math.max($n1, $n2)"/>
+        <xsl:value-of select="fn:max(($n1, $n2))"/>
       </xsl:if>
     </xsl:param>
     
@@ -502,9 +511,9 @@
     Utility functions and templates for tables
   -->
   <xsl:template mode="count-columns" match="h:tr">
-    <n>
+    <temp:n>
       <xsl:value-of select="count(h:td)"/>
-    </n>
+    </temp:n>
   </xsl:template>
   
   <!-- tables -->
@@ -515,11 +524,11 @@
     <xsl:param name="colcounts">
       <xsl:apply-templates mode="count-columns" select=".//h:tr"/>
     </xsl:param>
-    <xsl:param name="cols" select="math:max(exslt:node-set($colcounts)/n)"/>
+    <xsl:param name="cols" select="fn:max($colcounts/temp:n)"/>
     <xsl:param name="sorted">
-      <xsl:for-each select="exslt:node-set($colcounts)/n">
+      <xsl:for-each select="exslt:node-set($colcounts)/temp:n">
         <xsl:sort order="descending" data-type="number"/>
-        <n><xsl:value-of select="."/></n>
+        <temp:n><xsl:value-of select="."/></temp:n>
       </xsl:for-each>
     </xsl:param>
     <xsl:element name="{$informal}table">
@@ -539,6 +548,11 @@
                 <xsl:apply-templates select="@id"/>
                 <xsl:for-each select="h:td|h:th">
                   <entry>
+                    <xsl:if test="@colspan!=1">
+                      <xsl:attribute name="morerows">
+                        <xsl:value-of select="fn:sum((@colspan, -1))"/>
+                      </xsl:attribute>
+                    </xsl:if>
                     <xsl:apply-templates select="@id"/>
                     <xsl:apply-templates/>
                   </entry>
@@ -554,6 +568,11 @@
               <xsl:apply-templates select="@id"/>
               <xsl:for-each select="h:td|h:th">
                 <entry>
+                  <xsl:if test="@colspan!=1">
+                    <xsl:attribute name="morerows">
+                      <xsl:value-of select="fn:sum((@colspan, -1))"/>
+                    </xsl:attribute>
+                  </xsl:if>
                   <xsl:apply-templates select="@id"/>
                   <xsl:apply-templates/>
                 </entry>
