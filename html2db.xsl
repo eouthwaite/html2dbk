@@ -148,7 +148,7 @@
               <xsl:apply-templates select="@id"/>
             </xsl:when>
             <xsl:when test="h:a/@name">
-              <xsl:attribute name="id">
+              <xsl:attribute name="xml:id">
                 <xsl:value-of select="concat($anchor-id-prefix, h:a/@name)"/>
               </xsl:attribute>
             </xsl:when>
@@ -328,7 +328,7 @@
   
   <!-- anchors -->
   <xsl:template match="h:a[@name]">
-    <anchor id="{$anchor-id-prefix}{@name}"/>
+    <anchor xml:id="{$anchor-id-prefix}{@name}"/>
     <xsl:apply-templates/>
   </xsl:template>
   
